@@ -3,14 +3,28 @@ from fastapi import FastAPI, Body, Depends, HTTPException, status
 from app.model.model import ProductSchema, UserSchema, UserLoginSchema, ProductUpdate, ProductListSchema, ProductToList, ProviderSchema
 from typing import Annotated
 from app.model import model_db
-from app.auth.jwt_handler import signJWT
+from app.auth.jwt_handler import signJWT, decodeJWTT
 from app.auth.jwt_bearer import jwtBearer
 from database import engine, SessionLocal
 from sqlalchemy.orm import Session
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
 model_db.Base.metadata.create_all(bind=engine)
+
+origins = [
+    "*",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
@@ -81,6 +95,17 @@ def user_login(data: UserLoginSchema, db : db_dependeny):
     if user is None:
         raise HTTPException(status_code=404, detail="Invalid login details")
     return signJWT(data.email)
+
+# user auth
+@app.post("/user/yo/")
+async def user_current(token : str, db : db_dependeny):
+    token_decode = decodeJWTT(token)
+    if token_decode:
+        user = db.query(model_db.User).filter(model_db.User.email == token_decode["userID"]).first()
+        return user
+    else:
+        return {'error' : 'token na valido perroo'}
+
 
 #-----Provedor----------------------------------------------------------------------
 # Create provider
