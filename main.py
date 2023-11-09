@@ -102,7 +102,7 @@ async def user_current(token : str, db : db_dependeny):
     token_decode = decodeJWTT(token)
     if token_decode:
         user = db.query(model_db.User).filter(model_db.User.email == token_decode["userID"]).first()
-        return user
+        return user.id
     else:
         return {'error' : 'token na valido perroo'}
 
@@ -142,14 +142,25 @@ async def get_lists(db : db_dependeny):
 def add_product_tolist(data: ProductToList, db : db_dependeny):
     list = db.query(model_db.ProductList).filter(model_db.ProductList.id == data.id_list).first()
     product = db.query(model_db.Product).filter(model_db.Product.id == data.id_product).first()
-    user = db.query(model_db.User).filter(model_db.User.id == data.id_user).first()
-
-    if list is None or product is None or user is None:
+    
+    if list is None or product is None:
         raise HTTPException(status_code=404, detail="Invalid login details")
     
     product.product_list_id = data.id_list
-    list.id_user = data.id_user
-
+    
     db.commit()
-    db.refresh(list)
+    db.refresh(product)
+
+# Delete Product to list
+@app.post("/producttolist/delet/", tags=["list-products"])
+def delet_product_tolist(data: ProductToList, db : db_dependeny):
+    list = db.query(model_db.ProductList).filter(model_db.ProductList.id == data.id_list).first()
+    product = db.query(model_db.Product).filter(model_db.Product.id == data.id_product).first()
+    
+    if list is None or product is None:
+        raise HTTPException(status_code=404, detail="Invalid login details")
+    
+    product.product_list_id = 0
+    
+    db.commit()
     db.refresh(product)

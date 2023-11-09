@@ -5,6 +5,7 @@ class ProductSchema(BaseModel):
     name: str = Field(default=None)
     price: float = Field(default=None)
     date_creation: date = Field(default=None)
+    id_provider: int = Field(default=None)
     class Config:
         json_schema_extra = {
             "producto" : {
@@ -63,7 +64,7 @@ class ProductListSchema(BaseModel):
 class ProductToList(BaseModel):
     id_product : int = Field()
     id_list : int = Field()
-    id_user : int = Field() 
+    
 
 class ProviderSchema(BaseModel):
     name : str = Field(default=None)
