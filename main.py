@@ -105,7 +105,7 @@ async def list_create(list : ProductListSchema, db : db_dependeny):
     db.add(db_list)
     db.commit()
 
-# Get Products
+# Get list
 @app.get("/lists/", status_code=status.HTTP_200_OK, tags=["list-products"])
 async def get_lists(db : db_dependeny):
     lists = db.query(model_db.ProductList).all()
@@ -115,7 +115,7 @@ async def get_lists(db : db_dependeny):
 
 @app.post("/producttolist/", tags=["list-products"])
 def add_product_tolist(data: ProductToList, db : db_dependeny):
-    list = db.query(model_db.ProductList).filter(model_db.Product.id == data.id_list).first()
+    list = db.query(model_db.ProductList).filter(model_db.ProductList.id == data.id_list).first()
     product = db.query(model_db.Product).filter(model_db.Product.id == data.id_product).first()
     user = db.query(model_db.User).filter(model_db.User.id == data.id_user).first()
 

@@ -30,7 +30,7 @@ class ProductList(Base):
     id = Column(Integer, primary_key=True, index=True) 
     name = Column(String(70))
     state = Column(Boolean, default=True)
-    products = relationship("Product", back_populates="product_list") 
+    product = relationship("Product", back_populates="product_list") 
     id_user = Column(Integer, ForeignKey("users.id"))
     user = relationship("User", back_populates="product_list")
 
