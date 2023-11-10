@@ -160,7 +160,19 @@ def delet_product_tolist(data: ProductToList, db : db_dependeny):
     if list is None or product is None:
         raise HTTPException(status_code=404, detail="Invalid login details")
     
-    product.product_list_id = 0
+    product.product_list_id = None
     
     db.commit()
     db.refresh(product)
+
+# Get products of list
+@app.get("/list/products/{id}", tags=["list-products"])
+def get_products_list(id: int, db : db_dependeny):
+  list = db.query(model_db.ProductList).filter(model_db.ProductList.id == id).first()
+
+  if list is None:
+        raise HTTPException(status_code=404, detail="Invalid login details")
+  
+  products = db.query(model_db.Product).filter(model_db.Product.product_list_id == id).all()
+  
+  return products
