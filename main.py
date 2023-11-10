@@ -97,7 +97,7 @@ def user_login(data: UserLoginSchema, db : db_dependeny):
     return signJWT(data.email)
 
 # user auth
-@app.post("/user/yo/")
+@app.post("/user/yo/", tags=["user"])
 async def user_current(token : str, db : db_dependeny):
     token_decode = decodeJWTT(token)
     if token_decode:
@@ -120,7 +120,14 @@ async def add_provider(provider : ProviderSchema, db : db_dependeny):
 async def get_providers(db : db_dependeny):
     providers = db.query(model_db.Provider).all()
     return providers
-
+# Delete provider
+@app.delete("/provider/{id}", status_code=status.HTTP_204_NO_CONTENT, tags=["providers"])
+def delete_provider(provider_id: int, db: db_dependeny):
+    provider = db.query(model_db.Provider).filter(model_db.Provider.id == provider_id).first()
+    if not provider:
+        raise HTTPException(status_code=404, detail="Producto not found! Periito")
+    db.delete(provider)
+    db.commit()
 #-----BuyList------------------------------------------------------------ 
 
 # Create list_products
@@ -165,6 +172,16 @@ def delet_product_tolist(data: ProductToList, db : db_dependeny):
     db.commit()
     db.refresh(product)
 
+# Get list of user
+@app.get("/list/user/{id}", tags=["list-products"])
+def get_list_of_user(id: int, db : db_dependeny):
+    user = db.query(model_db.User).filter(model_db.User.id == id).first()
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    lists = db.query(model_db.ProductList).filter(model_db.ProductList.id_user == user.id).all()
+    return lists
+    
 # Get products of list
 @app.get("/list/products/{id}", tags=["list-products"])
 def get_products_list(id: int, db : db_dependeny):
